@@ -1,0 +1,77 @@
+
+
+Loading Required Packages and Librarries.
+
+```{r message=FALSE,warning=FALSE}
+#install.packages('tm',repos = "http://cran.us.r-project.org")
+#install.packages('twitteR',repos = "http://cran.us.r-project.org")
+#install.packages('wordcloud',repos = "http://cran.us.r-project.org")
+#install.packages('RColorBrewer',repos = "http://cran.us.r-project.org")
+#install.packages('e1071',repos = "http://cran.us.r-project.org")
+#install.packages('class',repos = "http://cran.us.r-project.org")
+
+
+library(tm)
+library(twitteR)
+library(wordcloud)
+library(e1071)
+library(class)
+
+```
+
+
+Set Twitter Access tokens
+
+```{r message=FALSE,warning=FALSE}
+ckey<-"AN9nCziLy3kYgMqbLnoQYuvpU"
+skey<-"DbbDPSKMsTGk7OI74QTTpacNGO4L9D1wslqgCRMJLVxeIMEAPt"
+token<-"90484454-3t8SxoOJOpLsvPOEF8tUbtSoGvBvfJFIw1DxOviH0"
+stoken<-"PRim0RnifHnROWqdtamg4yH2JJxICOxolnH25a37nUpJ3"
+
+```
+
+COnnect to twitter
+
+```{r message=FALSE,warning=FALSE}
+setup_twitter_oauth(ckey,skey,token,stoken)
+```
+
+Get the tweets.
+
+```{r message=FALSE,warning=FALSE}
+tweets <- searchTwitter("data+Science", n=5000, lang="en")
+text <- sapply(tweets, function(x) x$getText())
+```
+
+Remove emotions and create corpus
+
+```{r message=FALSE,warning=FALSE}
+text <- iconv(text, 'UTF-8', 'ASCII') 
+corpus <- Corpus(VectorSource(text)) 
+```
+
+Get the stop words for world cloud.
+
+```{r message=FALSE,warning=FALSE}
+term.doc.matrix <- TermDocumentMatrix(corpus,
+                                      control = list(removePunctuation = TRUE,
+                                                     stopwords = c("data","science","https", stopwords("english")),
+                                                     removeNumbers = TRUE,tolower = TRUE))
+```
+
+Get the words in matrix form
+
+```{r message=FALSE,warning=FALSE}
+term.doc.matrix <- as.matrix(term.doc.matrix)
+```
+
+Sorting words in decreasing order.
+```{r message=FALSE,warning=FALSE}
+word.freqs <- sort(rowSums(term.doc.matrix), decreasing=TRUE) 
+dm <- data.frame(word=names(word.freqs), freq=word.freqs)
+```
+
+Create word cloud.
+```{r message=FALSE,warning=FALSE}
+wordcloud(dm$word, dm$freq, random.order=FALSE, colors=brewer.pal(8, "Dark2"))
+```
