@@ -1,0 +1,77 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+```{r}
+setwd("C:/Users/nwelpulw/Desktop/Udemy/Projects/Corruption and Human developement")
+library(ggplot2)
+library(data.table)
+df <- fread('Economist_Assignment_Data.csv',drop=1)  # drop=1 to skip 1st column
+```
+
+check head of df
+```{r}
+head(df)
+```
+
+create a scatter plot.
+```{r}
+pl <- ggplot(df,aes(x=CPI,y=HDI,color=Region)) + geom_point()
+pl
+```
+
+Change the points to be larger empty circles.
+
+```{r}
+pl <- ggplot(df,aes(x=CPI,y=HDI,color=Region)) + geom_point(size=4,shape=1)
+pl
+```
+
+Add a trend line.
+
+```{r}
+pl2<-pl + geom_smooth(aes(group=1),method ='lm',formula = y~log(x),se=FALSE,color='red')
+pl2
+```
+
+Add text to the points.
+
+```{r}
+pl2<-pl2 + geom_text(aes(label=Country))
+```
+
+
+selecting the subset of countries we want to label!
+```{r}
+pointsToLabel <- c("Russia", "Venezuela", "Iraq", "Myanmar", "Sudan",
+                   "Afghanistan", "Congo", "Greece", "Argentina", "Brazil",
+                   "India", "Italy", "China", "South Africa", "Spane",
+                   "Botswana", "Cape Verde", "Bhutan", "Rwanda", "France",
+                   "United States", "Germany", "Britain", "Barbados", "Norway", "Japan",
+                   "New Zealand", "Singapore")
+
+pl3 <- pl2 + geom_text(aes(label = Country), color = "gray20", 
+                data = subset(df, Country %in% pointsToLabel),check_overlap = TRUE) +theme_bw() 
+
+pl3
+```
+
+Adjusting x axis and y axis.
+```{r}
+pl3 <- pl3 + scale_x_continuous(name = "Corruption Perceptions Index, 2011 (10=least corrupt)",
+                     limits = c(.9, 10.5),breaks=1:10) +scale_y_continuous(name = "Human Development Index, 2011 (1=Best)",
+                     limits = c(0.2, 1.0))+ ggtitle("Corruption and Human development")
+pl3
+```
+
+
+Adding Theme.
+
+```{r}
+#install.packages('ggthemes')
+library(ggthemes)
+pl3 + theme_economist_white()
+```
+
